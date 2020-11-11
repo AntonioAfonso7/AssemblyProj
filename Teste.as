@@ -9,7 +9,23 @@ Terreno         TAB     80
 
 ORIG            0000h
 
+TESTE:          ;Apenas para efeitos de teste
+                MVI     R1, Terreno
+                MVI     R2, 4
+                STOR    M[R1], R2
+                MVI     R6, 13
+                ADD     R1, R1, R6
+                STOR    M[R1], R2
 
+
+MAIN:           MVI     R6, SP
+                MVI     R4, 5        ;Define a seed
+                
+callfun:        MVI     R1, Terreno
+                MVI     R2, dim
+                JAL     atualizajogo
+                
+                BR      callfun        ;Atualiza o terreno varias vezes
                 
 atualizajogo:   ;Guardar valores
                 DEC     R6
@@ -68,16 +84,16 @@ geracato:       LOAD    R4, M[R6]        ;Seed
                 
                 MVI     R5, 1
                 AND     R2, R4, R5        ;Verifica se é impar -> R2
-                SHRA     R4
+                SHR     R4
                 
                 CMP     R2, R5
                 BR.NZ   .ELSE
                 MVI     R5, b400h
                 XOR     R4, R5, R4
                 
-.ELSE:          MVI     R5, 62258
+.ELSE:          MVI     R5, f332h
                 CMP     R4, R5
-                BR.O    .RETURN         
+                BR.NN   .RETURN         
                 MOV     R3, R0 ;Se x < 62258
                 
                 JMP     R7
