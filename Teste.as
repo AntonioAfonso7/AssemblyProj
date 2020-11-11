@@ -93,7 +93,7 @@ geracato:       LOAD    R4, M[R6]        ;Seed
                 
 .ELSE:          MVI     R5, f332h
                 CMP     R4, R5
-                BR.NN   .RETURN         
+                BR.O    .RETURN         
                 MOV     R3, R0 ;Se x < 62258
                 
                 JMP     R7
