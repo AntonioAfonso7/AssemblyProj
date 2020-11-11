@@ -7,6 +7,9 @@ ORIG            0000h
 
 Terreno         TAB     80
 
+ORIG            5000h
+X               WORD    5
+
 ORIG            0000h
 
 TESTE:          ;Apenas para efeitos de teste
@@ -19,7 +22,7 @@ TESTE:          ;Apenas para efeitos de teste
 
 
 MAIN:           MVI     R6, SP
-                MVI     R4, 5        ;Define a seed
+
                 
 callfun:        MVI     R1, Terreno
                 MVI     R2, dim
@@ -63,8 +66,6 @@ atualizajogo:   ;Guardar valores
                 STOR    M[R6], R7
                 DEC     R6
                 STOR    M[R6], R1
-                DEC     R6
-                STOR    M[R6], R4
                 
                 MVI     R1, 16        ;Altura máxima
                 JAL     geracato
@@ -79,21 +80,25 @@ atualizajogo:   ;Guardar valores
                 JMP     R7
                 
                 
-geracato:       LOAD    R4, M[R6]        ;Seed
-                INC     R6
+geracato:       MVI     R3, X
+                LOAD    R4, M[R3]
                 
                 MVI     R5, 1
                 AND     R2, R4, R5        ;Verifica se é impar -> R2
                 SHR     R4
+                
+                STOR    M[R3], R4
                 
                 CMP     R2, R5
                 BR.NZ   .ELSE
                 MVI     R5, b400h
                 XOR     R4, R5, R4
                 
+                STOR    M[R3], R4
+                
 .ELSE:          MVI     R5, f332h
                 CMP     R4, R5
-                BR.O    .RETURN         
+                BR.NC   .RETURN         
                 MOV     R3, R0 ;Se x < 62258
                 
                 JMP     R7
