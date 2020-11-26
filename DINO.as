@@ -31,6 +31,7 @@ CHAO_DINO       WORD    0F0Dh
 TETO_DINO       WORD    110Dh
 JMP_TICK        WORD    0
 ALT_ATUAL       WORD    ALT_SALTO
+DOWN_TICK       WORD    0
 
 ORIG            0000h
 
@@ -72,7 +73,10 @@ callfun:        MVI     R1, TERM_CURSOR
                 MVI     R2, dim
                 JAL     escreveterreno
                 DSI
-                JAL     PROCESS_JUMP
+                MVI     R1, TERM_STATUS
+                LOAD    R2, M[R1]
+                CMP     R2, R0
+                JAL.NZ  PROCESS_JUMP
                 MVI     R1, JMP_TICK
                 LOAD    R1, M[R1]
                 CMP     R1, R0
@@ -260,21 +264,23 @@ escrevedino:    MVI     R5, TERM_CURSOR
                 MVI     R3, 0100h
                 SUB     R1, R1, R3
                 STOR    M[R5], R1
+                MVI     R2, 'D'
                 STOR    M[R4], R2
                 JMP     R7
 
 saltodino:      DEC     R6
                 STOR    M[R6], R7
 
-                MVI     R2, ALT_ATUAL
-                LOAD    R1, M[R2]
-                CMP     R1, R0
-                BR.Z    .DESCE
-                MVI     R3, ALT_SALTO
-                CMP     R1, R3
+                MVI     R3, DOWN_TICK
+                LOAD    R3, M[R3]
+                CMP     R3, R0
+                BR.P    .DESCE
                 BR.Z    .SOBE
+                BR      .RETURN
                 
-.SOBE:          DEC     R1
+.SOBE:          MVI     R2, ALT_ATUAL
+                LOAD    R1, M[R2]
+                DEC     R1
                 STOR    M[R2], R1
                 
                 MVI     R1, CHAO_DINO
@@ -292,9 +298,17 @@ saltodino:      DEC     R6
                 STOR    M[R1], R2
                 
                 JAL     escrevedino
+                
+                MVI     R2, ALT_ATUAL
+                LOAD    R1, M[R2]
+                CMP     R1, R0
+                BR.Z    .SETJUMP
+                
                 BR      .RETURN
                 
-.DESCE:         INC     R1
+.DESCE:         MVI     R2, ALT_ATUAL
+                LOAD    R1, M[R2]
+                INC     R1
                 STOR    M[R2], R1
                 
                 MVI     R1, TETO_DINO
@@ -311,12 +325,43 @@ saltodino:      DEC     R6
                 ADD     R2, R2, R3
                 STOR    M[R1], R2
                 
+                MVI     R1, CHAO_DINO
+                LOAD    R2, M[R1]
+                ADD     R2, R2, R3
+                STOR    M[R1], R2
+                
                 JAL     escrevedino
+                
+                MVI     R2, ALT_ATUAL
+                LOAD    R1, M[R2]
+                MVI     R3, ALT_SALTO
+                CMP     R3, R1
+                BR.Z    .RESET
+                
+                BR      .RETURN
+                
+                
+.RESET:         MVI     R1, DOWN_TICK
+                STOR    M[R1], R0
+                MVI     R1, CHAO_DINO
+                MVI     R2, 0F0Dh
+                STOR    M[R1], R2
+                MVI     R1, JMP_TICK
+                STOR    M[R1], R0
+                BR      .RETURN
+                
+                
+.SETJUMP:       MVI     R1, DOWN_TICK
+                MVI     R2, 1
+                STOR    M[R1], R2
                 BR      .RETURN
                 
 .RETURN:        LOAD    R7, M[R6]
                 INC     R6
                 JMP     R7
+
+
+
 
 TIMER_AUX:      DEC     R6
                 STOR    M[R6], R1
