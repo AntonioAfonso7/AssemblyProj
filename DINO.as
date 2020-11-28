@@ -15,9 +15,9 @@ TMP_COUNTER     EQU     FFF6h
 TMP_CONTROL     EQU     FFF7h
 TMP_SETSTART    EQU     1
 TMP_SETSTOP     EQU     0
-COUNT_VAL       EQU     1
+COUNT_VAL       EQU     2
 
-ALT_SALTO       EQU     4
+ALT_SALTO       EQU     5
 
 ORIG            0000h
 
@@ -28,7 +28,7 @@ X               WORD    5
 START_GAME      WORD    0
 TIMER_TICK      WORD    0
 CHAO_DINO       WORD    0F0Dh
-TETO_DINO       WORD    110Dh
+TETO_DINO       WORD    080Dh
 JMP_TICK        WORD    0
 ALT_ATUAL       WORD    ALT_SALTO
 DOWN_TICK       WORD    0
@@ -63,7 +63,8 @@ TIMERLOOP:      MVI     R1, TIMER_TICK
                 JAL     PROCESS_TIME
                 
                 
-callfun:        MVI     R1, TERM_CURSOR
+callfun:        DSI
+                MVI     R1, TERM_CURSOR
                 MVI     R2, TER_INIT
                 STOR    M[R1], R2
                 MVI     R1, Terreno
@@ -72,7 +73,6 @@ callfun:        MVI     R1, TERM_CURSOR
                 MVI     R1, Terreno
                 MVI     R2, dim
                 JAL     escreveterreno
-                DSI
                 MVI     R1, TERM_STATUS
                 LOAD    R2, M[R1]
                 CMP     R2, R0
@@ -201,15 +201,21 @@ escreveterreno:
                 BR.Z    .ESCREVE
                 
 
-.CACTO_SERIO:   
+.CACTO_CHAO:   
                 MVI     R1, TERM_CURSOR
                 STOR    M[R1], R4
-                MVI     R1, '0'
-                STOR    M[R5], R1
+                MVI     R2, '0'
+                STOR    M[R5], R2
+                
+                
+.CACTO_ASERIO:  
                 MVI     R2, 0100h
                 SUB     R4, R4, R2
+                STOR    M[R1], R4
+                MVI     R2, '4'
+                STOR    M[R5], R2
                 DEC     R3
-                BR.NZ   .CACTO_SERIO
+                BR.NZ   .CACTO_ASERIO
                 
                 BR      .SALTA
                 
